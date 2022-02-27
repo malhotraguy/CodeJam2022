@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} Register your complaint {% endblock %}</h1>
+    <form method="post">
+        <label for="title">Name</label>
+        <br>
+        <input type="text" name="name"
+               placeholder="Fist & Last Name"
+               value="{{ request.form['name'] }}"/>
+        <br>
+
+        <label for="address">Address</label>
+        <br>
+        <input type="text" name="address"
+               placeholder="123 street name"
+               value="{{ request.form['address'] }}"/>
+        <br>
+
+        <label for="complaint_type">Complaint Type</label>
+        <br>
+        <input type="text" name="complaint_type"
+               placeholder="Bad Job/Not Cleaned"
+               value="{{ request.form['complaint_type'] }}"/>
+        <br>
+        <button type="submit">Submit</button>
+    </form>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} Register your complaint {% endblock %}</h1>
+    <form method="post">
+        <label for="title">Name</label>
+        <br>
+        <input type="text" name="name"
+               placeholder="Fist & Last Name"
+               value="{{ request.form['name'] }}"/>
+        <br>
+
+        <label for="address">Address</label>
+        <br>
+        <input type="text" name="address"
+               placeholder="123 street name"
+               value="{{ request.form['address'] }}"/>
+        <br>
+
+        <label for="mobile_number">Mobile Number</label>
+        <br>
+        <input type="text" name="mobile_number"
+               placeholder="+15140000000"
+               value="{{ request.form['mobile_number'] }}"/>
+        <br>
+
+        <label for="email_id">Email ID</label>
+        <br>
+        <input type="text" name="email_id"
+               placeholder="my@example.com"
+               value="{{ request.form['email_id'] }}"/>
+        <br>
+
+        <label for="app_alert">App Alert</label>
+        <br>
+        <input type="text" name="app_alert"
+               placeholder="true/false"
+               value="{{ request.form['app_alert'] }}"/>
+        <br>
+
+         <label for="sms_alert">SMS Alert</label>
+        <br>
+        <input type="text" name="sms_alert"
+               placeholder="true/false"
+               value="{{ request.form['sms_alert'] }}"/>
+        <br>
+
+        <label for="email_alert">Email Alert</label>
+        <br>
+        <input type="text" name="email_alert"
+               placeholder="true/false"
+               value="{{ request.form['email_alert'] }}"/>
+        <br>
+        <button type="submit" name="submit_button">Submit</button>
+    </form>
+{% endblock %}
