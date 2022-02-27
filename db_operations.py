@@ -53,11 +53,13 @@ def create_complaint(name, address, complaint_type, threshold=5):
     total_complaints = find_number_complaints(address=address, complaint_type=complaint_type, threshold=threshold)
     return {"Total no. of complaints registered": total_complaints}
 
-
+#Function that adds a new street to the database
 def add_street(address, longitude, latitude, date_of_clearing, clearing_status):
     snow_buddy_db.streets.insert_one({"address":address, "longitude":longitude, "latitude":latitude, "date_of_clearing":date_of_clearing, "clearing_status":clearing_status})
-    return {"Added address": ""}
+    return "Address added"
 
+#This function creates a path using all the streets in the database that are still have snow
+#It returns a list of geolocalisation coordinates as string json
 def get_new_route():
     streets = snow_buddy_db.streets.find({"clearing_status": "False"})
     streets = list(streets)
@@ -67,21 +69,24 @@ def get_new_route():
     for street in streets:
         street_locations.append(street["longitude"] + " " + street["latitude"])
 
-    result = gmaps.directions(street_locations[0], street_locations[0], mode="driving", waypoints=street_locations[1:])
+    result = gmaps.directions(street_locations[0], street_locations[len(street_locations)-1], mode="driving", waypoints=street_locations[1:], optimize_waypoints=True)
 
-    steps = ""
-
-    steps = []
-
+    #This creates the route as a string (not used)
+    stepsString = ""
     for i, leg in enumerate(result[0]["legs"]):
-        steps = steps + "Stop: " + str(i) + " " + str(leg["start_location"])\
-                +" to " + " " + str(leg["end_location"])\
+        stepsString = stepsString + "Stop: " + str(i) + " " + str(leg["start_address"])\
+                +" to " + " " + str(leg["end_address"])\
                 + " distance: " + str(leg["distance"]["value"])\
                 + " traveling Time: " +  str(leg["duration"]["value"]) + \
                 "\n"
 
-    print(steps)
+
+    #This creates the route as a JSON
+    steps = []
+    for i, leg in enumerate(result[0]["legs"]):
+        steps.append({"Stop" : str(i), "start_location": str(leg["start_location"]), "end_location": str(leg["end_location"]), "distance": str(leg["distance"]["value"])})
 
 
-    return steps
+    print(stepsString)
+    return str(steps)
 
