@@ -21,7 +21,7 @@ def send_email_alert(alert_msg, receiver_email):
 
     except Exception as e:
         print("Exception!!")
-        print(e.message)
+        print(e)
 
 
 if __name__ == '__main__':

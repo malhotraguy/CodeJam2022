@@ -22,7 +22,7 @@ def send_sms_alert(alert_msg, receiver_mobile):
         print(message.sid)
     except Exception as e:
         print("Exception!!")
-        print(e.message)
+        print(e)
 
 
 if __name__ == '__main__':
