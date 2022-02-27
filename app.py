@@ -3,10 +3,11 @@ __author__ = "Rahul Malhotra"
 
 import os
 from datetime import datetime
+from string import Template
 
 from flask import Flask, jsonify, request, render_template, url_for, flash, redirect
 
-from db_operations import client, create_complaint, create_alert_subscription, send_alert
+from db_operations import client, create_complaint, create_alert_subscription, send_alert, set_approximation_data
 
 app = Flask(__name__)
 
@@ -48,7 +49,7 @@ def register_complain():
             error = result
         flash(message=error)
 
-    return render_template('complaints.html', error=error)
+    return render_template('complaints.html')
 
 
 @app.route('/subscribe/', methods=['GET', 'POST'])
@@ -81,13 +82,14 @@ def alert_subscription():
             error = "Success"
         flash(error)
 
-    return render_template('alert_subscription.html', error=error)
+    return render_template('alert_subscription.html')
 
 
 @app.route("/send_approximation/", methods=['GET', 'POST'])
-def send_approximation_alerts():
+def send_approximation_alerts(redirect_to_finish=False):
     """
 
+    :param redirect_to_finish:
     :return:
     """
     error = None
@@ -101,9 +103,33 @@ def send_approximation_alerts():
         else:
             message = f"Snow removing vehicle will be on street in next: {approximation_in_mins} mins (approx.)"
             error = send_alert(address=address, message=message)
+            set_approximation_data(address, approximation_in_mins)
+            redirect_to_finish = True
         flash(error)
+        if redirect_to_finish:
+            now_time = datetime.utcnow()
+            return redirect(url_for("success", data=request.form, start_time=now_time), code=307)
 
-    return render_template('approximation.html', error=error)
+    return render_template('approximation.html')
+
+
+@app.route("/success/", methods=['GET', 'POST'])
+def success():
+    address = request.form.get('address')
+    approximation_in_mins = request.form.get('approximation_in_mins')
+    start_time_str = request.args.get("start_time")
+    start_time = datetime.strptime(start_time_str, '%Y-%m-%d %H:%M:%S.%f')
+    STATIC_MAP_TEMPLATE = Template("""
+    <img src="https://maps.googleapis.com/maps/api/staticmap?size=700x300&markers=${place_name}" alt="map of ${place_name}">
+    """)
+
+    STREET_VIEW_TEMPLATE = Template("""
+    <img src="https://maps.googleapis.com/maps/api/streetview?size=700x300&location=${place_name}" alt="street view of ${place_name}">
+    """)
+    return (f"""<h1>Started at: {start_time} Street: {address}, approx: {approximation_in_mins}</h1>"""+
+            STATIC_MAP_TEMPLATE.substitute(place_name="Montreal") +
+            STREET_VIEW_TEMPLATE.substitute(place_name="Montreal")
+    )
 
 
 if __name__ == '__main__':

@@ -4,4 +4,14 @@
     <h1>Hello there!</h1>
     <h2>Welcome to SNOVER!</h2>
     <h3>{{ utc_dt }}</h3>
+    <ul class="navbar-nav">
+    <li class="nav-item active">
+    <a class="navbar-brand" href="{{ url_for('register_complain')}}">Complaints!</a><br>
+        <li class="nav-item active">
+    <a class="navbar-brand" href="{{ url_for('alert_subscription')}}">Alert Subscriptions!</a><br>
+        <li class="nav-item active">
+    <a class="navbar-brand" href="{{ url_for('send_approximation_alerts')}}">Send Approximation Alerts!</a><br>
+    </li>
+    </ul>
+
 {% endblock %}

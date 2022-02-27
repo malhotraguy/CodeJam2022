@@ -1,5 +1,6 @@
 __author__ = "Rahul Malhotra"
 
+from datetime import datetime, date
 from pprint import pprint
 
 from pymongo import MongoClient
@@ -34,7 +35,7 @@ def check_db_availability(mongo_client: MongoClient) -> None:
 check_db_availability(mongo_client=client)
 
 
-def find_number_complaints(address, threshold, complaint_type):
+def find_number_complaints(address, threshold, complaint_type) -> int:
     """
 
     :param address:
@@ -65,7 +66,7 @@ def create_complaint(name: str, address: str, complaint_type: str, threshold: in
 
 
 def create_alert_subscription(person_name: str, address: str, mobile_number: str, email_id: str, sms_alert: bool,
-                              email_alert: bool, app_alert: bool):
+                              email_alert: bool, app_alert: bool) -> None:
     """
 
     :param person_name:
@@ -82,7 +83,7 @@ def create_alert_subscription(person_name: str, address: str, mobile_number: str
                  "email_alert": email_alert, "app_alert": app_alert}}, upsert=True)
 
 
-def send_alert(address: str, message: str):
+def send_alert(address: str, message: str) -> str:
     """
 
     :param address:
@@ -101,3 +102,20 @@ def send_alert(address: str, message: str):
     success_message = f"Alerted Mobiles:{alert_mobiles} \nAlerted Emails:{alert_emails}"
     pprint(success_message)
     return success_message
+
+
+def set_approximation_data(address: str, approximation_in_mins: str) -> None:
+    snow_buddy_db.streets.update_one({"address": address}, {
+        "$set": {"clearing_status": "In Progress"}})
+    todays_date = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
+    todays_doc = snow_buddy_db.cleaning_history.find_one(
+        {"address": address, "apprx_alert_datetime": {"$gte": todays_date}})
+    if todays_doc:
+        snow_buddy_db.cleaning_history.update_one({"address": address}, {
+            "$set": {"apprx_alert_datetime": datetime.utcnow(),
+                     "approx_in_mins": approximation_in_mins}})
+    else:
+        snow_buddy_db.cleaning_history.insert_one(
+            {"address": address, "apprx_alert_datetime": datetime.utcnow(),
+             "approx_in_mins": approximation_in_mins})
+
