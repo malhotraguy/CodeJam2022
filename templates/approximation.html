@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} Send Approximation {% endblock %}</h1>
+    <form method="post">
+
+        <label for="address">Address</label>
+        <br>
+        <input type="text" name="address"
+               placeholder="123 street name"
+               value="{{ request.form['address'] }}"/>
+        <br>
+
+        <label for="approximation_in_mins">Approximation in Minutes </label>
+        <br>
+        <input type="text" name="approximation_in_mins"
+               placeholder="20"
+               value="{{ request.form['approximation_in_mins'] }}"/>
+        <br>
+        <button type="submit">Submit</button>
+    </form>
+{% endblock %}
