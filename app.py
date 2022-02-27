@@ -33,6 +33,7 @@ def register_complain():
     result = create_complaint(person_name, address, complaint_type, threshold=5)
     return result
 
+#This endpoint can be used to quickly add streets in the database
 @app.route('/add/', methods=["GET"])
 def add_new_street():
     address = request.args.get('address')
@@ -43,6 +44,7 @@ def add_new_street():
     return add_street(address, longitude, latitude, date_of_clearing, clearing_status)
 
 
+#This endpoint returns the computed route
 @app.route('/compute/')
 def showStreets():
     return get_new_route()
