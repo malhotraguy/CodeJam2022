@@ -1,92 +1,54 @@
+# Coded in python 3.8
 __author__ = "Rahul Malhotra"
 
 from pprint import pprint
 
 import googlemaps
-from flask import jsonify
-from pymongo import MongoClient
-import os
-from dotenv import load_dotenv
-from pymongo.errors import ConnectionFailure
 
-load_dotenv()  # use dotenv to hide sensitive credential as environment variables
-usrn = os.environ.get("username")
-passw = os.environ.get("password")
-key = os.environ.get("key")
-client = MongoClient(
-    f"mongodb+srv://{usrn}:{passw}@snowclearancebuddy.7tjmg.mongodb.net/?retryWrites=true&w=majority")
-snow_buddy_db = client.SnowBuddy
+from flask import Flask, jsonify, request
 
-gmaps = googlemaps.Client(key=key)
+from db_operations import client, create_complaint, add_street, get_new_route
 
-# db = client.Test
-# resp = db.Creator.find({"Creator": "Rahul Malhotra"})
-# pprint(list(resp))
-
-def check_db_availability(mongo_client: MongoClient) -> None:
-    """
-
-    :param mongo_client: Pymongo Client
-    :return:
-    """
-    try:
-        # The ping command is cheap and does not require auth.
-        mongo_client.admin.command('ping')
-    except ConnectionFailure:
-        print("Server not available")
+app = Flask(__name__)
 
 
-check_db_availability(mongo_client=client)
+@app.route('/')
+def index():
+    return 'Welcome to Snow Clearance Buddy App!!'
 
 
-def find_number_complaints(address, threshold, complaint_type):
-    if complaint_type:
-        compliants = snow_buddy_db.complaints.find({"address": address, "complaint_type": complaint_type})
-    else:
-        compliants = snow_buddy_db.complaints.find({"address": address})
-    number_of_complaints = len(list(compliants))
-    return number_of_complaints
+@app.route('/creator/')
+def creator():
+    db = client.Test
+    result = db.Creator.find({"Creator": "Rahul Malhotra"})
+    result = str(list(result))
+    return jsonify(result)
 
 
-def create_complaint(name, address, complaint_type, threshold=5):
-    snow_buddy_db.complaints.insert_one({"name": name, "address": address, "complaint_type": complaint_type})
-    total_complaints = find_number_complaints(address=address, complaint_type=complaint_type, threshold=threshold)
-    return {"Total no. of complaints registered": total_complaints}
+@app.route('/complaint/', methods=["GET"])
+def register_complain():
+    person_name = request.args.get('name')
+    address = request.args.get('address')
+    complaint_type = request.args.get('complaint_type')
+    result = create_complaint(person_name, address, complaint_type, threshold=5)
+    return result
 
-#Function that adds a new street to the database
-def add_street(address, longitude, latitude, date_of_clearing, clearing_status):
-    snow_buddy_db.streets.insert_one({"address":address, "longitude":longitude, "latitude":latitude, "date_of_clearing":date_of_clearing, "clearing_status":clearing_status})
-    return "Address added"
-
-#This function creates a path using all the streets in the database that are still have snow
-#It returns a list of geolocalisation coordinates as string json
-def get_new_route():
-    streets = snow_buddy_db.streets.find({"clearing_status": "False"})
-    streets = list(streets)
-
-    street_locations = []
-
-    for street in streets:
-        street_locations.append(street["longitude"] + " " + street["latitude"])
-
-    result = gmaps.directions(street_locations[0], street_locations[len(street_locations)-1], mode="driving", waypoints=street_locations[1:], optimize_waypoints=True)
-
-    #This creates the route as a string (not used)
-    stepsString = ""
-    for i, leg in enumerate(result[0]["legs"]):
-        stepsString = stepsString + "Stop: " + str(i) + " " + str(leg["start_address"])\
-                +" to " + " " + str(leg["end_address"])\
-                + " distance: " + str(leg["distance"]["value"])\
-                + " traveling Time: " +  str(leg["duration"]["value"]) + \
-                "\n"
+#This endpoint can be used to quickly add streets in the database
+@app.route('/add/', methods=["GET"])
+def add_new_street():
+    address = request.args.get('address')
+    longitude = request.args.get('longitude')
+    latitude = request.args.get('latitude')
+    date_of_clearing = request.args.get('date_of_clearing')
+    clearing_status = request.args.get('clearing_status')
+    return add_street(address, longitude, latitude, date_of_clearing, clearing_status)
 
 
-    #This creates the route as a JSON
-    steps = []
-    for i, leg in enumerate(result[0]["legs"]):
-        steps.append({"Stop" : str(i), "start_location": str(leg["start_location"]), "end_location": str(leg["end_location"]), "distance": str(leg["distance"]["value"])})
+#This endpoint returns the computed route
+@app.route('/compute/')
+def showStreets():
+    return get_new_route()
 
 
-    print(stepsString)
-    return str(steps)
-
+if __name__ == '__main__':
+    app.run()
