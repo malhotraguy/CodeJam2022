@@ -1,7 +1,7 @@
 __author__ = "Rahul Malhotra"
 
 import os
-from sendgrid import SendGridAPIClient
+import sendgrid
 from sendgrid.helpers.mail import Mail
 from dotenv import load_dotenv
 
@@ -16,7 +16,7 @@ def send_email_alert(alert_msg, receiver_email):
         subject='Snow Clearance Buddy Alert',
         html_content=f'<strong>{alert_msg}</strong>')
     try:
-        sg_client = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+        sg_client = sendgrid.SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
         response = sg_client.send(message)
 
     except Exception as e:
