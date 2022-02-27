@@ -3,5 +3,7 @@ python-dotenv==0.19.2
 Flask=2.0.3
 gunicorn==20.1.0
 twilio~=7.7.0
-sendgrid=6.9.6
 geopy~=2.2.0
+Flask~=2.0.3
+sendgrid~=6.9.6
+django-sendgrid-webhook~=0.3.0

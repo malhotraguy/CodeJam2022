@@ -8,7 +8,7 @@ import os
 from dotenv import load_dotenv
 from pymongo.errors import ConnectionFailure
 
-from email_operations import send_email_alert
+from email_ops import send_email_alert
 from sms_operations import send_sms_alert
 
 load_dotenv()  # use dotenv to hide sensitive credential as environment variables
